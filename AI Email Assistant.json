@@ -1,0 +1,858 @@
+{
+  "name": "AI Email Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "labelIds": [
+            "INBOX"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        160
+      ],
+      "id": "4a871ae8-b1c9-4f7a-ab2b-88f4c41bbe04",
+      "name": "1. Monitor Incoming Emails",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "jLxWaRUIVsLiAsVq",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{$json.id}}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        160
+      ],
+      "id": "c0de86d2-6f48-4e26-9ecf-107111c65e6a",
+      "name": "2. Retrieve Email Details",
+      "webhookId": "5a0527cf-257d-4822-9e0b-162d9b61c0ee",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "jLxWaRUIVsLiAsVq",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9e0bc7cf-b066-4c1a-a833-55cae24e244f",
+              "name": "Subject",
+              "value": "={{ $json.Subject }}",
+              "type": "string"
+            },
+            {
+              "id": "01d119c9-045c-4108-b83d-b47a05a415a4",
+              "name": "From",
+              "value": "={{ $json.From }}",
+              "type": "string"
+            },
+            {
+              "id": "78005200-83d1-427d-872b-af1c68c176c5",
+              "name": "Body",
+              "value": "={{ $json.snippet }}",
+              "type": "string"
+            },
+            {
+              "id": "a3878bcb-1cd0-4c4b-a1e4-c9a50b56de70",
+              "name": "Thread",
+              "value": "={{ $json.threadId }}",
+              "type": "string"
+            },
+            {
+              "id": "a3f4b330-fad7-4e58-b952-9195fc114881",
+              "name": "MessageID",
+              "value": "={{$json.id}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        160
+      ],
+      "id": "716fea0f-c670-4658-a3ff-6427eed1d5fd",
+      "name": "3. Prepare Email Data"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Subject:\n\n{{ $json.Subject }}\n\nSender:\n\n{{ $json.From }}\n\nEmail:\n\n{{ $json.Body }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an executive AI email assistant.\n\nAnalyze the email.\n\nDetermine:\n\n1. Summary\n2. Category\n3. Priority\n4. Sentiment\n5. Whether a reply is required\n6. Write a professional reply.\n\nReturn JSON only."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        672,
+        160
+      ],
+      "id": "b826b97e-0b34-4396-8866-ffe33366db6e",
+      "name": "4. Analyze Email with AI"
+    },
+    {
+      "parameters": {
+        "model": "cohere/north-mini-code:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        656,
+        384
+      ],
+      "id": "bcdd0cb6-5c34-47af-8feb-6ead767e6be3",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "PYzDQpka4u45qvfm",
+          "name": "Second acc"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"summary\":\"string\",\n  \"category\":\"string\",\n  \"priority\":\"LOW | MEDIUM | HIGH\",\n  \"sentiment\":\"POSITIVE | NEGATIVE | NEUTRAL\",\n  \"requiresReply\":true,\n  \"draftReply\":\"string\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        832,
+        384
+      ],
+      "id": "435f7bd2-57e3-474a-b2da-fc37131a2efe",
+      "name": "5. Parse AI Response"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.priority }}",
+                    "rightValue": "Low",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "8f489008-36c2-47f0-a7f3-955fe3244e89"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "LOW"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "734d512c-3845-436b-981a-7f94a51a6ba5",
+                    "leftValue": "={{ $json.output.priority }}",
+                    "rightValue": "MEDIUM",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "MEDIUM"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "bb9234bf-d745-44a2-b590-ee51a019c07e",
+                    "leftValue": "={{ $json.output.priority }}",
+                    "rightValue": "HIGH",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "HIGH"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1024,
+        144
+      ],
+      "id": "42ab0739-b51f-41a0-9a09-52be45ddbe04",
+      "name": "6. Route by Priority"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6577c398-5a58-495c-a0fe-35590d817fe1",
+              "leftValue": "={{ $json.output.requiresReply }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1248,
+        160
+      ],
+      "id": "ac0ea9a2-1d68-41c7-927b-5bc7bfd9cbe2",
+      "name": "7. Check if Reply is Required"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1aArkV4ipiezybm9EgXVHnYKm_3suFUHb0OFNkiJRlOk",
+          "mode": "list",
+          "cachedResultName": "AI Email Assistant",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aArkV4ipiezybm9EgXVHnYKm_3suFUHb0OFNkiJRlOk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Pending Replies",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aArkV4ipiezybm9EgXVHnYKm_3suFUHb0OFNkiJRlOk/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{$now}}",
+            "Sender": "={{ $('3. Prepare Email Data').item.json.From }}",
+            "Subject": "={{ $('3. Prepare Email Data').item.json.Subject }}",
+            "Category": "={{ $('6. Route by Priority').item.json.output.category }}",
+            "Priority": "={{ $('6. Route by Priority').item.json.output.priority }}",
+            "Sentiment": "={{ $('6. Route by Priority').item.json.output.sentiment }}",
+            "Status": "Pending Review",
+            "Suggested Reply": "={{ $('6. Route by Priority').item.json.output.draftReply }}",
+            "Message ID": "={{ $('3. Prepare Email Data').item.json.MessageID }}",
+            "Thread ID": "={{ $('3. Prepare Email Data').item.json.Thread }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sender",
+              "displayName": "Sender",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Subject",
+              "displayName": "Subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sentiment",
+              "displayName": "Sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Suggested Reply",
+              "displayName": "Suggested Reply",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Message ID",
+              "displayName": "Message ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Thread ID",
+              "displayName": "Thread ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1472,
+        64
+      ],
+      "id": "3f80f36b-7292-44f9-808e-103cd612e1ef",
+      "name": "8. Save Suggested Reply",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "OKkqDH11KnvqdjLy",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1aArkV4ipiezybm9EgXVHnYKm_3suFUHb0OFNkiJRlOk",
+          "mode": "list",
+          "cachedResultName": "AI Email Assistant",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aArkV4ipiezybm9EgXVHnYKm_3suFUHb0OFNkiJRlOk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1348961309,
+          "mode": "list",
+          "cachedResultName": "Email Logs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aArkV4ipiezybm9EgXVHnYKm_3suFUHb0OFNkiJRlOk/edit#gid=1348961309"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{$now}}",
+            "Sender": "={{ $('3. Prepare Email Data').item.json.From }}",
+            "Subject": "={{ $('3. Prepare Email Data').item.json.Subject }}",
+            "Summary": "={{ $('4. Analyze Email with AI').item.json.output.summary }}",
+            "Category": "={{ $('4. Analyze Email with AI').item.json.output.category }}",
+            "Priority": "={{ $('4. Analyze Email with AI').item.json.output.priority }}",
+            "Sentiment": "={{ $('4. Analyze Email with AI').item.json.output.sentiment }}",
+            "Requires Reply": "={{ $('4. Analyze Email with AI').item.json.output.requiresReply }}",
+            "Status": "Reply Needed"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sender",
+              "displayName": "Sender",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Subject",
+              "displayName": "Subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Summary",
+              "displayName": "Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sentiment",
+              "displayName": "Sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Requires Reply",
+              "displayName": "Requires Reply",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1472,
+        256
+      ],
+      "id": "2102f72e-35c9-43ae-93bb-08a8ef7a019c",
+      "name": "11. Log Email Activity",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "OKkqDH11KnvqdjLy",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1aArkV4ipiezybm9EgXVHnYKm_3suFUHb0OFNkiJRlOk",
+          "mode": "list",
+          "cachedResultName": "AI Email Assistant",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aArkV4ipiezybm9EgXVHnYKm_3suFUHb0OFNkiJRlOk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1348961309,
+          "mode": "list",
+          "cachedResultName": "Email Logs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aArkV4ipiezybm9EgXVHnYKm_3suFUHb0OFNkiJRlOk/edit#gid=1348961309"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{$now}}",
+            "Sender": "={{ $('3. Prepare Email Data').item.json.From }}",
+            "Subject": "={{ $('3. Prepare Email Data').item.json.Subject }}",
+            "Summary": "={{ $('4. Analyze Email with AI').item.json.output.summary }}",
+            "Category": "={{ $('4. Analyze Email with AI').item.json.output.category }}",
+            "Priority": "={{ $('4. Analyze Email with AI').item.json.output.priority }}",
+            "Sentiment": "={{ $('4. Analyze Email with AI').item.json.output.sentiment }}",
+            "Requires Reply": "={{ $('4. Analyze Email with AI').item.json.output.requiresReply }}",
+            "Status": "Reply Needed"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sender",
+              "displayName": "Sender",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Subject",
+              "displayName": "Subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Summary",
+              "displayName": "Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sentiment",
+              "displayName": "Sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Requires Reply",
+              "displayName": "Requires Reply",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1696,
+        64
+      ],
+      "id": "34bb74d0-bed4-4be4-9e89-25a4441b0a27",
+      "name": "9. Log Email Activity",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "OKkqDH11KnvqdjLy",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "5518864435",
+        "text": "=📧 AI Email Assistant\n\n📩 Subject:\n{{$('3. Prepare Email Data').item.json.Subject}}\n\n👤 Sender:\n{{ $('3. Prepare Email Data').item.json.From }}\n\n📂 Category:\n{{ $('6. Route by Priority').item.json.output.category }}\n\n🔥 Priority:\n{{ $('6. Route by Priority').item.json.output.priority }}\n\n😊 Sentiment:\n{{ $('6. Route by Priority').item.json.output.sentiment }}\n\n📝 Suggested Reply\n{{ $('6. Route by Priority').item.json.output.draftReply }}\n\n✅ Status:\nPending Human Review",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1920,
+        64
+      ],
+      "id": "1d553168-1982-4fae-9743-3397e2cf1f19",
+      "name": "10. Notify Team",
+      "webhookId": "cf90e9d8-26b1-4e23-9fd7-5c51fa8c7e43",
+      "credentials": {
+        "telegramApi": {
+          "id": "X1seE7bqguReBgbq",
+          "name": "AI Email Assistant"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "1. Monitor Incoming Emails": {
+      "main": [
+        [
+          {
+            "node": "2. Retrieve Email Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2. Retrieve Email Details": {
+      "main": [
+        [
+          {
+            "node": "3. Prepare Email Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3. Prepare Email Data": {
+      "main": [
+        [
+          {
+            "node": "4. Analyze Email with AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "4. Analyze Email with AI",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "5. Parse AI Response": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "4. Analyze Email with AI",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "4. Analyze Email with AI": {
+      "main": [
+        [
+          {
+            "node": "6. Route by Priority",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "6. Route by Priority": {
+      "main": [
+        [
+          {
+            "node": "7. Check if Reply is Required",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "7. Check if Reply is Required",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "7. Check if Reply is Required",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "7. Check if Reply is Required": {
+      "main": [
+        [
+          {
+            "node": "8. Save Suggested Reply",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "11. Log Email Activity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "8. Save Suggested Reply": {
+      "main": [
+        [
+          {
+            "node": "9. Log Email Activity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "9. Log Email Activity": {
+      "main": [
+        [
+          {
+            "node": "10. Notify Team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "d22d327a-192e-4390-88d8-23e8bc8ed891",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
+  },
+  "nodeGroups": [],
+  "id": "02qyi8mq15lOlZ3l",
+  "tags": []
+}
