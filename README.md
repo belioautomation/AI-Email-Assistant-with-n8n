@@ -150,11 +150,9 @@ This workflow helps organizations:
 
 ---
 
-## 🎬 Demo
+## 🎥 Demo Video
 
-<p align="center">
-  <img src="images/demo.mp4" width="100%">
-</p>
+📹 [Watch the demo](images/demo.mp4)
 
 ---
 
