@@ -144,22 +144,19 @@ This workflow helps organizations:
 
 ## 📸 Workflow Screenshot
 
-> Add your workflow screenshot here.
-
-```text
-images/workflow.png
-```
+<p align="center">
+  <img src="images/workflow.png" width="100%">
+</p>
 
 ---
 
 ## 🎥 Demo
 
-> Add your Loom or YouTube demo link here.
+## 🎬 Demo
 
-```text
-https://your-demo-link.com
-```
-
+<p align="center">
+  <img src="images/demo.mp4" width="100%">
+</p>
 ---
 
 ## 🚀 Future Improvements
