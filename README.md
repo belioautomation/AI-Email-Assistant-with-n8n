@@ -150,8 +150,6 @@ This workflow helps organizations:
 
 ---
 
-## 🎥 Demo
-
 ## 🎬 Demo
 
 <p align="center">
