@@ -1,188 +1,294 @@
-# 🤖 AI Email Assistant with n8n
+# 🤖 AI Email Assistant
 
-![n8n](https://img.shields.io/badge/n8n-Workflow%20Automation-EA4B71?style=for-the-badge&logo=n8n&logoColor=white)
-![OpenRouter](https://img.shields.io/badge/OpenRouter-AI-blue?style=for-the-badge)
+![n8n](https://img.shields.io/badge/n8n-Automation-EA4B71?style=for-the-badge&logo=n8n&logoColor=white)
+![OpenRouter](https://img.shields.io/badge/OpenRouter-AI-6C63FF?style=for-the-badge)
 ![Gmail](https://img.shields.io/badge/Gmail-API-D14836?style=for-the-badge&logo=gmail&logoColor=white)
-![Google Sheets](https://img.shields.io/badge/Google%20Sheets-Integration-34A853?style=for-the-badge&logo=googlesheets&logoColor=white)
+![Google Sheets](https://img.shields.io/badge/Google%20Sheets-34A853?style=for-the-badge&logo=googlesheets&logoColor=white)
 ![Telegram](https://img.shields.io/badge/Telegram-Bot-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)
-![LLM](https://img.shields.io/badge/LLM-OpenRouter-purple?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
-![Status](https://img.shields.io/badge/Status-Completed-success?style=for-the-badge)
 
-An **AI-powered email automation workflow** built with **n8n** that intelligently processes incoming Gmail messages using AI. The workflow classifies emails, assigns priorities, determines whether a response is required, generates professional reply suggestions, logs activities, and notifies users for human review.
-
----
-
-## 🚀 Features
-
-- 📥 Monitor incoming Gmail messages automatically
-- 🤖 AI-powered email analysis using OpenRouter
-- 📝 Generate concise email summaries
-- 🏷️ Categorize emails automatically
-- 🚦 Assign priority levels (Low, Medium, High)
-- 😊 Detect email sentiment
-- ✉️ Determine whether an email requires a reply
-- 💬 Generate professional AI reply suggestions
-- 📋 Save suggested replies for human review
-- 📊 Maintain an audit trail in Google Sheets
-- 📲 Send Telegram notifications for actionable emails
+An AI-powered email automation workflow built with **n8n**, **OpenRouter**, **Gmail**, **Google Sheets**, and **Telegram**. The workflow intelligently analyzes incoming emails, classifies them by category and priority, detects sentiment, determines whether a reply is required, generates professional response suggestions, and routes emails through a **Human-in-the-Loop (HITL)** approval process before any action is taken.
 
 ---
 
-## 🛠 Tech Stack
+# 📖 Overview
 
-| Category | Technology |
-|----------|------------|
-| Workflow Automation | n8n |
-| AI Model | OpenRouter |
-| Email Service | Gmail API |
-| Database | Google Sheets |
-| Notifications | Telegram Bot |
-| AI Processing | Large Language Model (LLM) |
+## Problem
+
+Managing large volumes of email manually is time-consuming and often leads to delayed responses, inconsistent communication, and missed high-priority messages. Traditional automation can also introduce risks when AI sends replies without human oversight.
+
+## Solution
+
+The AI Email Assistant combines AI-powered email analysis with a **Human-in-the-Loop (HITL)** workflow. Instead of automatically replying, the system generates structured insights and professional reply suggestions, allowing users to review and approve responses before they are sent.
+
+This approach improves productivity while maintaining accuracy, accountability, and control over customer communications.
 
 ---
 
-## 🏗 Workflow Architecture
+# ✨ Features
 
-```text
-Monitor Incoming Emails
-        │
-        ▼
-Retrieve Email Details
-        │
-        ▼
-Prepare Email Data
-        │
-        ▼
-Analyze Email with AI
-        │
-        ▼
-Parse AI Response
-        │
-        ▼
-Route by Priority
-        │
-        ▼
-Check if Reply is Required
-      ┌────────────┴─────────────┐
-      │                          │
-     YES                       NO
-      │                          │
-      ▼                          ▼
-Save Suggested Reply      Log Email Activity
-      │                          │
-      ▼                          ▼
-Log Email Activity            End Workflow
-      │
-      ▼
-Notify Team
+## 📥 Email Processing
+
+- Monitor incoming Gmail messages automatically
+- Retrieve sender, subject, and email content
+- Standardize email data for AI processing
+
+## 🤖 AI Analysis
+
+- Generate concise email summaries
+- Categorize emails automatically
+- Detect sentiment
+- Assign priority levels
+- Determine if a reply is required
+- Generate professional reply suggestions
+
+## 👨‍💼 Human-in-the-Loop Review
+
+- Store AI-generated replies for manual approval
+- Prevent fully automated outbound emails
+- Support safe AI-assisted communication
+
+## 📊 Activity Tracking
+
+- Log processed emails to Google Sheets
+- Maintain an audit trail
+- Track pending replies
+
+## 📲 Notifications
+
+- Send Telegram notifications for actionable emails
+- Alert reviewers when human approval is required
+
+---
+
+# 🏗 Workflow Architecture
+
+```
+              Gmail Trigger
+                    │
+                    ▼
+          Retrieve Email Details
+                    │
+                    ▼
+            Prepare Email Data
+                    │
+                    ▼
+          AI Email Analysis
+                    │
+                    ▼
+      Parse Structured AI Output
+                    │
+                    ▼
+           Route by Priority
+                    │
+                    ▼
+        Reply Required Decision
+           │                 │
+           │ Yes             │ No
+           ▼                 ▼
+ Store Suggested Reply    Log Activity
+           │                 │
+           ▼                 ▼
+ Log Email Activity      End Workflow
+           │
+           ▼
+ Telegram Notification
 ```
 
 ---
 
-## 📂 Google Sheets Structure
+# 📸 Workflow Screenshot
 
-### 📋 Email Logs
+The image below shows the complete AI Email Assistant workflow implemented in **n8n**, including AI analysis, conditional routing, Google Sheets logging, and Telegram notifications.
 
-| Timestamp | Sender | Subject | Summary | Category | Priority | Sentiment | Requires Reply | Status |
-|-----------|---------|----------|---------|----------|----------|-----------|----------------|--------|
-
----
-
-### 📝 Pending Replies
-
-| Timestamp | Sender | Subject | Suggested Reply | Priority | Status | Thread ID |
-|-----------|---------|----------|-----------------|----------|--------|-----------|
+<p align="center">
+  <img src="images/workflow.png" alt="AI Email Assistant Workflow" width="100%">
+</p>
 
 ---
 
-## 🧠 AI Structured Output
+# 🎥 Demo Video
+
+Watch the complete workflow demonstration below.
+
+📹 **Demo Video**
+
+https://github.com/user-attachments/assets/YOUR_VIDEO_LINK
+
+---
+
+# 🛠 Tech Stack
+
+## Workflow Automation
+
+- n8n
+
+## Artificial Intelligence
+
+- OpenRouter
+- Large Language Models (LLMs)
+- Prompt Engineering
+- Structured AI Outputs
+
+## Google Workspace
+
+- Gmail API
+- Google Sheets API
+
+## Notifications
+
+- Telegram Bot API
+
+## Programming
+
+- JavaScript
+
+---
+
+# 📂 Repository Structure
+
+```text
+AI-Email-Assistant-with-n8n/
+
+├── README.md
+├── workflow/
+│   └── AI Email Assistant.json
+├── images/
+│   └── workflow.png
+├── LICENSE
+└── demo.mp4
+```
+
+---
+
+# ⚙️ Setup Guide
+
+## 1. Clone Repository
+
+```bash
+git clone https://github.com/belioautomation/AI-Email-Assistant-with-n8n.git
+```
+
+## 2. Import Workflow
+
+Import the workflow JSON into your n8n instance.
+
+```
+AI Email Assistant.json
+```
+
+## 3. Configure Credentials
+
+Configure the following credentials inside n8n:
+
+- Gmail OAuth2
+- OpenRouter API
+- Google Sheets OAuth2
+- Telegram Bot API
+
+## 4. Update Configuration
+
+Modify the following based on your environment:
+
+- Gmail inbox
+- Google Sheets IDs
+- Telegram Chat ID
+- AI prompts
+- OpenRouter model
+
+## 5. Activate Workflow
+
+Once credentials are configured, activate the workflow.
+
+---
+
+# 🧠 Example AI Output
 
 ```json
 {
-  "summary": "string",
-  "category": "string",
-  "priority": "LOW | MEDIUM | HIGH",
-  "sentiment": "POSITIVE | NEUTRAL | NEGATIVE",
+  "summary": "Customer requests a refund due to a billing issue.",
+  "category": "Billing",
+  "priority": "HIGH",
+  "sentiment": "Negative",
   "requiresReply": true,
-  "draftReply": "string"
+  "draftReply": "Thank you for contacting us. We have received your request and will review your refund as soon as possible."
 }
 ```
 
 ---
 
-## 📈 Business Value
+# 📊 Google Sheets Structure
+
+## Email Activity Log
+
+| Timestamp | Sender | Subject | Category | Priority | Sentiment | Status |
+|-----------|---------|----------|----------|----------|-----------|--------|
+
+## Pending Reply Queue
+
+| Timestamp | Sender | Subject | Suggested Reply | Priority | Status |
+|-----------|---------|----------|----------------|----------|--------|
+
+---
+
+# 💼 Business Value
 
 This workflow helps organizations:
 
 - Reduce manual email processing
 - Improve response consistency
-- Prioritize critical emails automatically
-- Generate AI-assisted replies
-- Keep humans in control before responding
-- Maintain a searchable audit history
-- Increase productivity through automation
+- Prioritize urgent emails automatically
+- Assist teams with AI-generated replies
+- Maintain human oversight
+- Keep a searchable audit history
+- Increase operational efficiency
 
 ---
 
-## 📚 Skills Demonstrated
+# 💡 Skills Demonstrated
 
 - AI Workflow Automation
-- n8n Development
-- Gmail API Integration
-- OpenRouter Integration
+- Human-in-the-Loop Systems
 - Prompt Engineering
-- Structured AI Outputs
-- Conditional Routing
-- Human-in-the-Loop Automation
+- OpenRouter Integration
+- Gmail API Integration
 - Google Workspace Automation
-- Google Sheets Integration
 - Telegram Bot Integration
+- JavaScript Data Transformation
+- Structured AI Outputs
 - Enterprise Workflow Design
 
 ---
 
-## 📸 Workflow Screenshot
+# 🚀 Future Improvements
 
-<p align="center">
-  <img src="images/workflow.png" width="100%">
-</p>
-
----
-
-## 🎥 Demo Video
-
-📹 [Watch the demo](images/demo.mp4)
-
----
-
-## 🚀 Future Improvements
-
-- Gmail draft creation after n8n Gmail node enhancements
-- Automatic email reply approval rules
-- Multi-user approval workflow
+- Gmail Draft creation
+- Automatic approval rules
+- Multi-user review system
 - CRM integration
-- Slack or Microsoft Teams notifications
+- Slack & Microsoft Teams support
 - AI confidence scoring
 - Analytics dashboard
+- Email thread memory
+- Multi-language support
 
 ---
 
-## 📄 License
-
-This project is licensed under the **MIT License**.
-
----
-
-## 👨‍💻 Author
+# 👨‍💻 Author
 
 **Belio C. Sinangote**
 
-🎓 BSIT Student | AI Automation Developer | n8n Enthusiast
+BS Information Technology Student  
+AI Automation Developer | n8n Workflow Builder
 
-- **GitHub:** https://github.com/belioautomation
-- **LinkedIn:** https://www.linkedin.com/in/belio-sinangote-180375402/*
+GitHub: https://github.com/belioautomation
+
+LinkedIn: https://www.linkedin.com/in/belio-sinangote-180375402/
 
 ---
 
-⭐ If you found this project helpful, consider giving it a **Star**!
+# 📄 License
+
+This project is licensed under the MIT License.
+
+---
